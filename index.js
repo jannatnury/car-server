@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express();
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
+require('dotenv').config();
 const port = process.env.PORT || 5000;
 
 // midleware
@@ -31,6 +32,19 @@ async function run() {
         await client.connect();
         const productCollection = client.db('car-doctor').collection('products');
 
+        /**
+         * --------------------------------------------------
+         * Get all products
+         * --------------------------------------------------
+         */
+
+        app.get('/products', async (req, res) => {
+            const query = req.query;
+            const cursor = query ? query : {};
+            const products = await productCollection.find(cursor).toArray();
+            res.send(products);
+        });
+    
     }
     finally {
         /**
