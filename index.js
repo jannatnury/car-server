@@ -36,7 +36,7 @@ async function run() {
         const orders = client.db('car-doctor').collection('orders');
         const reviewCollection = client.db('car-doctor').collection('reviews');
         const users = client.db('car-doctor').collection('users');
-        const admins = client.db('car-doctor').collection('admins');
+        const admins = client.db('car-doctor').collection('admin');
         const profile = client.db('car-doctor').collection('profile');
         const projects = client.db('car-doctor').collection('projects');
 
@@ -56,6 +56,42 @@ async function run() {
                 expiresIn: '3d'
             });
             res.send({ result, accessToken });
+        })
+
+        app.get('/api/admin',  async (req, res) => {
+            const email = req.query.email
+            const result = await admins.findOne({ email });
+            res.send(result);
+        })
+
+        // get all users
+        app.get('/api/users', async (req, res) => {
+            const adminCollection = await admins.find().toArray()
+            const usersCollection = await users.find().toArray();
+            usersCollection.forEach(user => {
+                const admin = adminCollection.find(admin => admin.email === user.email);
+                if (admin) {
+                    user.isAdmin = true;
+                } else {
+                    user.isAdmin = false;
+                }
+            })
+            res.send(usersCollection);
+
+        })
+
+        // get user profile
+        app.get('/api/users/profile/:email', async (req, res) => {
+            const email = req.params.email;
+            const result = await profile.findOne({ email });
+            if (result) {
+                res.send(result);
+            }
+            else {
+                res.send('User not found');
+            }
+
+
         })
 
         /**
@@ -108,6 +144,30 @@ async function run() {
         app.get('/api/orders', async (req, res) => {
             const email = req.query.email;
             const result = await orders.find({ user: email }).toArray();
+            res.send(result);
+        })
+
+        
+        /**
+         * --------------------------------------------------------------------
+         * add product route for admin
+         * --------------------------------------------------------------------
+         */
+
+         app.post('/api/products', async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.send(result);
+        })
+        /**
+         * --------------------------------------------------------------------
+         * delete product admin route
+         * --------------------------------------------------------------------
+         */
+
+         app.delete('/api/products/:id', async (req, res) => {
+            const product = req.params.id;
+            const result = await productCollection.deleteOne({ _id: ObjectId(product) });
             res.send(result);
         })
 
