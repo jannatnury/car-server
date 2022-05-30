@@ -165,10 +165,52 @@ async function run() {
          * --------------------------------------------------------------------
          */
 
-         app.delete('/api/products/:id', async (req, res) => {
-            const product = req.params.id;
-            const result = await productCollection.deleteOne({ _id: ObjectId(product) });
+         /**
+         * --------------------------------------------------------------------
+         * user profile update
+         * --------------------------------------------------------------------
+         */
+
+        app.put('/api/users/profile', async (req, res) => {
+            const data = req.body.updateData;
+            const filter = { email: data.email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: data,
+
+            }
+            console.log(data);
+            const result = await profile.updateOne(filter, updateDoc, options);
             res.send(result);
+        })
+
+        /**
+         * --------------------------------------------------------------------
+         * get user profile
+         * --------------------------------------------------------------------
+         */
+
+        app.get('/api/users/profile/:email',  async (req, res) => {
+            const email = req.params.email;
+            const result = await profile.findOne({ email });
+            if (result) {
+                res.send(result);
+            }
+            else {
+                res.send('User not found');
+            }
+
+
+        })
+
+         app.delete('/api/products/:id', async (req, res) => {
+            const product = req.params.id
+            console.log(product);
+            if(product){
+                const result = await productCollection.deleteOne({ _id: ObjectId(product) });
+                return res.send(result);
+            }
+            res.send({"message":"product not deleted"})
         })
 
     }
