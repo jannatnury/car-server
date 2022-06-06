@@ -159,12 +159,7 @@ async function run() {
             const result = await productCollection.insertOne(product);
             res.send(result);
         })
-        /**
-         * --------------------------------------------------------------------
-         * delete product admin route
-         * --------------------------------------------------------------------
-         */
-
+       
          /**
          * --------------------------------------------------------------------
          * user profile update
